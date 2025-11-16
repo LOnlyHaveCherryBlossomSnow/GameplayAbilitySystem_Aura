@@ -28,8 +28,8 @@ void AAuraPlayerController::CursorTrace()
 	if (!CursorHit.bBlockingHit) return;
 
 	LastActor = ThisActor;
-	ThisActor = Cast<IEnemyInterface>(CursorHit.GetActor());
-
+	// ThisActor = Cast<IEnemyInterface>(CursorHit.GetActor());
+	ThisActor = CursorHit.GetActor();
 	/**
 	 *  Line trace from currsor, there are several scenarios:
 	 *  A. LastActor is null && ThisActor is null
@@ -84,8 +84,12 @@ void AAuraPlayerController::BeginPlay()
 	check(AuraConText);
 
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());//访问控制增强
-	check(Subsystem);
-	Subsystem->AddMappingContext(AuraConText,0);//调用映射上下文  玩家就可以检索
+	//check(Subsystem);
+	if (Subsystem)
+	{
+		Subsystem->AddMappingContext(AuraConText,0);//调用映射上下文  玩家就可以检索
+		
+	}
 
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Default;
