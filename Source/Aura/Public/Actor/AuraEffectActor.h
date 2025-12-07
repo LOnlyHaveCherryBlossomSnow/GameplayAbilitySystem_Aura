@@ -5,10 +5,27 @@
 #include "CoreMinimal.h"
 #include "GameplayEffect.h"
 #include "GameFramework/Actor.h"
+#include "GameplayEffectTypes.h"
 #include "AuraEffectActor.generated.h"
 
-class USphereComponent;
-class USphereComponent;
+class UAbilitySystemComponent;
+class UGameplayEffect;
+
+UENUM(BlueprintType)
+enum class EEffectApplicationPolicy:uint8
+{
+	ApplyOnOverlap,
+	ApplyOnEndOverlap,
+	DoNotApply
+};
+
+UENUM(BlueprintType)
+enum class EEffectRemovalPolicy:uint8
+{
+	RemoveEndOverlap,
+	DoNotRemove
+};
+
 
 
 UCLASS()
@@ -27,8 +44,40 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void ApplyEffectToTarget(AActor* TargetActor, TSubclassOf<UGameplayEffect> GameplayEffectClass);
 	
+	UFUNCTION(BlueprintCallable)
+	void OnOverlap(AActor* TargetActor);
+	UFUNCTION(BlueprintCallable)
+	void OnEndOverlap(AActor* TargetActor);
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Applied Effects")
+	bool bDestoryOnEffectRemoval = false;
+	//拾取 立刻加
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Applied Effects")
 	TSubclassOf<UGameplayEffect> InstantGameplayEffectClass;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Applied Effects")
+	EEffectApplicationPolicy InstantEffectApplicationPolicy = EEffectApplicationPolicy::DoNotApply;
+
+	
+	//拾取 持续加
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
+	TSubclassOf<UGameplayEffect> DurationGameplayEffectClass;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Applied Effects")
+	EEffectApplicationPolicy  DurationEffectApplicationPolicy = EEffectApplicationPolicy::DoNotApply;
+
+	
+	//拾取 永久加
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
+	TSubclassOf<UGameplayEffect> InfiniteGameplayEffectClass;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Applied Effects")
+	EEffectApplicationPolicy InfiniteEffectApplicationPolicy = EEffectApplicationPolicy::DoNotApply;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category= "Applied Effects")
+	EEffectRemovalPolicy InfiniteEffectRemovalPolicy = EEffectRemovalPolicy::RemoveEndOverlap;
+
+	TMap<FActiveGameplayEffectHandle, UAbilitySystemComponent*> ActiveEffectHandles;
 private:
 	
 };
