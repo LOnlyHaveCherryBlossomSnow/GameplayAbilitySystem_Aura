@@ -24,4 +24,5 @@ public:
 protected:
 	// 当游戏开始或对象被生成时调用
 	virtual void BeginPlay() override;//初始化
+	virtual void InitAbilityActorInfo() override;
 };

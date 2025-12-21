@@ -2,8 +2,12 @@
 
 
 #include "AbilitySystem/AuraAttributeSet.h"
+
+#include "AbilitySystemBlueprintLibrary.h"
+#include "GameFramework/Character.h"
 #include "AbilitySystemComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "GameplayEffectExtension.h"
 
 UAuraAttributeSet::UAuraAttributeSet()
 {
@@ -43,20 +47,60 @@ void UAuraAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, 
 
 }
 
-void UAuraAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth)
+void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
+{
+	Super::PostGameplayEffectExecute(Data);
+	
+	FEffectProperties Props;
+	SetFEffectProperties(Data, Props);
+	
+}
+
+void UAuraAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, Health, OldHealth);//把以前的血复制到现在的血
 }
-inline void UAuraAttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth)
+inline void UAuraAttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, MaxHealth, OldMaxHealth);
 }
 
-void UAuraAttributeSet::OnRep_Mana(const FGameplayAttributeData& OldMana)
+void UAuraAttributeSet::OnRep_Mana(const FGameplayAttributeData& OldMana) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, Mana, OldMana);//把以前的蓝复制到现在的蓝
 }
-void UAuraAttributeSet::OnRep_MaxMana(const FGameplayAttributeData& OldMaxMana)
+void UAuraAttributeSet::OnRep_MaxMana(const FGameplayAttributeData& OldMaxMana) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, MaxMana, OldMaxMana);
+}
+
+void UAuraAttributeSet::SetFEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props)const
+{
+	//source = causer of the effect , target = target of the effect
+	Props.EffectContextHandle =  Data.EffectSpec.GetContext();// 从效果规范中获取上下文句柄
+	Props.SourceASC = Props.EffectContextHandle.GetOriginalInstigatorAbilitySystemComponent(); // 获取原始触发者的能力系统组件
+
+	if (IsValid(Props.SourceASC) && Props.SourceASC->AbilityActorInfo.IsValid() && Props.SourceASC->AbilityActorInfo->AvatarActor.IsValid())
+	{ // 如果源ASC有效且其能力演员信息和角色演员都有效
+		Props.SourceAvatarActor = Props.SourceASC->AbilityActorInfo->AvatarActor.Get();// 获取源角色演员
+		Props.SourceController = Props.SourceASC->AbilityActorInfo->PlayerController.Get();// 获取源控制器
+		if (Props.SourceController == nullptr && Props.SourceAvatarActor != nullptr) // 如果源控制器为空但源角色演员不为空，则尝试通过角色演员获取控制器
+		{
+			if (const APawn* Pawn = Cast<APawn>(Props.SourceAvatarActor))
+			{
+				Props.SourceController = Pawn->GetController();
+			}
+		}
+		if (Props.SourceController) // 如果源控制器有效，则尝试获取源角色
+		{
+			Props.SourceCharacter = Cast<ACharacter>(Props.SourceController->GetPawn());
+		}
+	}
+	if (Data.Target.AbilityActorInfo.IsValid() && Data.Target.AbilityActorInfo-> AvatarActor.IsValid()) // 如果目标的能力演员信息和角色演员都有效
+	{
+		Props.TargetAvatarActor = Data.Target.AbilityActorInfo->AvatarActor.Get(); // 获取目标角色演员
+		Props.TargetController = Data.Target.AbilityActorInfo->PlayerController.Get();// 获取目标控制器
+		Props.TargetCharacter = Cast<ACharacter>(Props.TargetAvatarActor);// 尝试将目标角色演员转换为目标角色
+		Props.TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Props.TargetAvatarActor); // 获取目标的能力系统组件
+	}
 }

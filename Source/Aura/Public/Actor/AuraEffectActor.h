@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameplayEffect.h"
-#include "GameFramework/Actor.h"
+// #include "GameFramework/Actor.h"
 #include "GameplayEffectTypes.h"
 #include "AuraEffectActor.generated.h"
 
@@ -38,7 +38,7 @@ public:
 	AAuraEffectActor();
 
 protected:
-	// Called when the game starts or when spawned
+	// Called when the game starts or when spawnedMM
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintCallable)
@@ -78,6 +78,9 @@ protected:
 	EEffectRemovalPolicy InfiniteEffectRemovalPolicy = EEffectRemovalPolicy::RemoveEndOverlap;
 
 	TMap<FActiveGameplayEffectHandle, UAbilitySystemComponent*> ActiveEffectHandles;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Applied Effects")
+	float ActorLevel = 1.f;
 private:
 	
 };

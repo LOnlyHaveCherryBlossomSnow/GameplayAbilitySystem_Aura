@@ -37,4 +37,6 @@ protected:
 	// 属性组件
 	UPROPERTY()
 	TObjectPtr<UAttributeSet> AttributeSet;//属性组件
+
+	virtual void InitAbilityActorInfo();
 };

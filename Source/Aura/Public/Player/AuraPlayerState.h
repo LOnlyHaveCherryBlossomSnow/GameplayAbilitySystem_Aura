@@ -4,9 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
+#include "GameFramework/Actor.h" // 确保包含AActor头文件
 #include "GameFramework/PlayerState.h"
 #include "AuraPlayerState.generated.h"
-
 
 class UAbilitySystemComponent;
 class UAttributeSet;
