@@ -57,5 +57,5 @@ void AAuraCharacter::InitAbilityActorInfo()
 	UE_LOG(LogTemp, Warning, TEXT("初始化 InitAbilityActorInfo -> AttributeSet: %s"), 
 	   *GetNameSafe(AttributeSet));
 
-	InitializePrimaryAttributes();
+	InitializeDefaultAttributes();
 }
